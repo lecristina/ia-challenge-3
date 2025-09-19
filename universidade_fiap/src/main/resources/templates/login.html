@@ -1,0 +1,166 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head
+	th:replace="~{fragmentos :: cabecalho('Login - Sistema de Gestão de Motos')}" />
+
+<body class="bg-light">
+	<div
+		class="container-fluid vh-100 d-flex align-items-center justify-content-center">
+		<div class="row w-100 justify-content-center">
+			<div class="col-md-6 col-lg-4">
+				<div class="card-custom">
+					<div class="card-body p-5">
+						<!-- Logo e título -->
+						<div class="text-center mb-4">
+							<i class="fas fa-motorcycle fa-3x text-primary mb-3"></i>
+							<h2 class="fw-bold text-primary">Gestão de Motos</h2>
+							<p class="text-muted">Sistema de controle e monitoramento</p>
+						</div>
+
+						<!-- Alerts -->
+						<div th:if="${param.logout}"
+							class="alert alert-success-custom alert-dismissible fade show"
+							role="alert">
+							<i class="fas fa-check-circle me-2"></i> <strong>Logout
+								realizado!</strong> Você foi desconectado com sucesso.
+							<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+						</div>
+
+						<div th:if="${param.sucesso}"
+							class="alert alert-success-custom alert-dismissible fade show"
+							role="alert">
+							<i class="fas fa-check-circle me-2"></i> <strong>Sucesso!</strong>
+							Usuário cadastrado com sucesso! Faça login com suas credenciais.
+							<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+						</div>
+
+						<div th:if="${param.falha}"
+							class="alert alert-danger-custom alert-dismissible fade show"
+							role="alert">
+							<i class="fas fa-exclamation-triangle me-2"></i> <strong>Erro!</strong>
+							Username ou senha inválidos.
+							<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+						</div>
+
+						<!-- Formulário de login -->
+						<form th:action="@{/login}" method="post" id="loginForm">
+							<div class="mb-4">
+								<label for="username" class="form-label-custom"> <i
+									class="fas fa-envelope me-1"></i>Email
+								</label> <input class="form-control form-control-custom" type="email"
+									id="username" name="username" placeholder="Digite seu email"
+									required autocomplete="username">
+							</div>
+
+							<div class="mb-4">
+								<label for="password" class="form-label-custom"> <i
+									class="fas fa-lock me-1"></i>Senha
+								</label>
+								<div class="input-group">
+									<input class="form-control form-control-custom" type="password"
+										id="password" name="password" placeholder="Digite sua senha"
+										required autocomplete="current-password">
+									<button class="btn btn-outline-secondary" type="button"
+										id="togglePassword" title="Mostrar/Ocultar senha">
+										<i class="fas fa-eye"></i>
+									</button>
+								</div>
+							</div>
+
+							<div class="d-grid mb-4">
+								<button type="submit"
+									class="btn btn-primary-custom btn-custom btn-lg">
+									<i class="fas fa-sign-in-alt me-2"></i>Entrar
+								</button>
+							</div>
+						</form>
+
+						<!-- Links adicionais -->
+						<div class="text-center">
+							<p class="text-muted mb-3">Não tem uma conta?</p>
+							<a th:href="@{/usuario/novo}"
+								class="btn btn-outline-primary btn-custom"> <i
+								class="fas fa-user-plus me-1"></i>Cadastrar Usuário
+							</a>
+
+
+						</div>
+
+						<!-- Informações de teste -->
+						<div class="mt-4">
+							<div class="alert alert-info-custom">
+								<h6 class="alert-heading">
+									<i class="fas fa-info-circle me-1"></i>Credenciais de Teste
+								</h6>
+								<p class="mb-1">
+									<strong>Email:</strong> admin@teste.com
+								</p>
+								<p class="mb-0">
+									<strong>Senha:</strong> admin1234
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Footer -->
+				<div class="text-center mt-4">
+					<p class="text-muted">
+						<i class="fas fa-copyright me-1"></i> 2024 Sistema de Gestão de
+						Motos - FIAP
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script th:inline="javascript">
+		// Toggle password visibility
+		document.getElementById('togglePassword').addEventListener('click',
+				function() {
+					const password = document.getElementById('password');
+					const icon = this.querySelector('i');
+
+					if (password.type === 'password') {
+						password.type = 'text';
+						icon.classList.remove('fa-eye');
+						icon.classList.add('fa-eye-slash');
+					} else {
+						password.type = 'password';
+						icon.classList.remove('fa-eye-slash');
+						icon.classList.add('fa-eye');
+					}
+				});
+
+		// Validação do formulário
+		document.getElementById('loginForm').addEventListener(
+				'submit',
+				function(e) {
+					const email = document.getElementById('username').value
+							.trim();
+					const password = document.getElementById('password').value;
+
+					if (!email || !password) {
+						e.preventDefault();
+						alert('Por favor, preencha todos os campos.');
+						return;
+					}
+
+					// Validação básica de email
+					const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+					if (!emailRegex.test(email)) {
+						e.preventDefault();
+						alert('Por favor, digite um email válido.');
+						return;
+					}
+				});
+
+		// Auto-focus no campo de email
+		document.getElementById('username').focus();
+	</script>
+</body>
+
+</html>

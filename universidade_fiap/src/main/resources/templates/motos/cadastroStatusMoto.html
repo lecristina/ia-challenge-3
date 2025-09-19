@@ -1,0 +1,217 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos :: cabecalho('Status da Moto')}" />
+
+<body>
+	<!-- Navbar -->
+	<nav th:replace="~{fragmentos :: navbar}" />
+
+	<div class="container-fluid py-4">
+		<div th:replace="~{fragmentos :: saudacoes(${usuario_logado})}" />
+
+		<!-- Alerts -->
+		<div th:if="${param.erro}" class="alert alert-danger-custom alert-dismissible fade show" role="alert">
+			<i class="fas fa-exclamation-triangle me-2"></i>
+			<strong>Erro!</strong> <span th:text="${param.erro[0]}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+		
+		<div th:if="${erro}" class="alert alert-danger-custom alert-dismissible fade show" role="alert">
+			<i class="fas fa-exclamation-triangle me-2"></i>
+			<strong>Erro!</strong> <span th:text="${erro}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+
+		<!-- Header -->
+		<div class="row mb-4">
+			<div class="col-12">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<h2 class="mb-0">
+							<i class="fas fa-tools me-2"></i>
+							<span th:text="${editando != null and editando ? 'Editar Status da Moto' : 'Cadastrar Status da Moto'}"></span>
+						</h2>
+						<p class="text-muted mb-0">
+							<span th:text="${editando != null and editando ? 'Atualize o status da moto' : 'Registre o status atual da moto'}"></span>
+						</p>
+					</div>
+					<div>
+						<a th:href="${editando != null and editando ? '/motos/operacoes' : '/motos'}" class="btn btn-secondary-custom btn-custom">
+							<i class="fas fa-arrow-left me-1"></i>Voltar
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Formulário -->
+		<div class="row justify-content-center">
+			<div class="col-lg-8">
+				<div class="card-custom">
+					<div class="card-body p-4">
+						<form th:object="${statusMoto}" 
+							  th:action="${editando != null and editando ? '/motos/status/atualizar' : '/motos/status/salvar'}" 
+							  method="post" 
+							  id="statusForm">
+							
+							<!-- Seleção da Moto -->
+							<div class="mb-4">
+								<label for="moto" class="form-label-custom">
+									<i class="fas fa-motorcycle me-1"></i>Selecionar Moto *
+								</label>
+								<select class="form-select form-control-custom" 
+										name="moto.id" 
+										id="moto" 
+										required>
+									<option value="">Selecione uma moto...</option>
+									<option th:each="m : ${motos}" 
+											th:value="${m.id}"
+											th:text="${m.placa + ' - ' + m.chassi}"
+											th:selected="${editando != null and editando and statusMoto.moto != null and statusMoto.moto.id == m.id}">
+									</option>
+								</select>
+								<div class="form-text">
+									<i class="fas fa-info-circle me-1"></i>
+									Escolha a moto que terá o status atualizado
+								</div>
+							</div>
+
+							<!-- Status -->
+							<div class="mb-4">
+								<label for="status" class="form-label-custom">
+									<i class="fas fa-flag me-1"></i>Status Atual *
+								</label>
+								<select class="form-select form-control-custom" 
+										name="status" 
+										id="status" 
+										required>
+									<option value="">Selecione um status...</option>
+									<option th:each="s : ${status}" 
+											th:value="${s}"
+											th:text="${s.descricao}"
+											th:selected="${editando != null and editando and statusMoto.status != null and statusMoto.status == s}">
+									</option>
+								</select>
+								<div class="form-text">
+									<i class="fas fa-info-circle me-1"></i>
+									Selecione o status atual da moto
+								</div>
+							</div>
+
+							<!-- Área -->
+							<div class="mb-4">
+								<label for="area" class="form-label-custom">
+									<i class="fas fa-map-marker-alt me-1"></i>Área/Localização *
+								</label>
+								<input class="form-control form-control-custom" 
+									   type="text" 
+									   name="area" 
+									   id="area" 
+									   th:value="${statusMoto.area}"
+									   placeholder="Ex: Oficina, Pátio, Vendas, Manutenção"
+									   required
+									   maxlength="50">
+								<div class="form-text">
+									<i class="fas fa-info-circle me-1"></i>
+									Informe onde a moto está localizada atualmente
+								</div>
+							</div>
+
+							<!-- Informações sobre status -->
+							<div class="mb-4">
+								<div class="alert alert-info-custom">
+									<i class="fas fa-lightbulb me-2"></i>
+									<strong>Status Disponíveis:</strong>
+									<ul class="mb-0 mt-2">
+										<li><span class="badge badge-status-pronta me-1">Pronta</span> - Moto pronta para uso</li>
+										<li><span class="badge badge-status-pendente me-1">Pendente</span> - Aguardando definição</li>
+										<li><span class="badge badge-status-reparo me-1">Reparo Simples</span> - Pequenos reparos</li>
+										<li><span class="badge badge-status-danos me-1">Danos Estruturais</span> - Danos graves</li>
+										<li><span class="badge badge-status-motor me-1">Motor Defeituoso</span> - Problemas no motor</li>
+										<li><span class="badge badge-status-manutencao me-1">Manutenção Agendada</span> - Manutenção programada</li>
+										<li><span class="badge badge-status-sem-placa me-1">Sem Placa</span> - Aguardando emplacamento</li>
+										<li><span class="badge badge-status-alugada me-1">Alugada</span> - Em uso por cliente</li>
+										<li><span class="badge badge-status-aguardando me-1">Aguardando Aluguel</span> - Disponível para aluguel</li>
+									</ul>
+								</div>
+							</div>
+
+							<!-- Botões -->
+							<div class="d-flex justify-content-between">
+								<a th:href="${editando != null and editando ? '/motos/operacoes' : '/motos'}" class="btn btn-secondary-custom btn-custom">
+									<i class="fas fa-times me-1"></i>Cancelar
+								</a>
+								<button type="submit" 
+										class="btn btn-primary-custom btn-custom"
+										th:onclick="'mostrarLoading(this)'">
+									<i class="fas fa-save me-1"></i>
+									<span th:text="${editando != null and editando ? 'Atualizar Status' : 'Salvar Status'}"></span>
+								</button>
+							</div>
+
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Informações do usuário -->
+		<div class="row mt-4">
+			<div class="col-12">
+				<div class="card-custom">
+					<div class="card-body">
+						<h6 class="card-title">
+							<i class="fas fa-user me-2"></i>Informações do Usuário
+						</h6>
+						<p class="card-text mb-0">
+							<strong>Filial:</strong> <span th:text="${usuario_logado?.nomeFilial}"></span><br>
+							<strong>Email:</strong> <span th:text="${usuario_logado?.email}"></span><br>
+							<strong>Perfil:</strong> <span th:text="${usuario_logado?.perfil?.descricao}"></span>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script th:inline="javascript">
+		// Validação do formulário
+		document.getElementById('statusForm').addEventListener('submit', function(e) {
+			const moto = document.getElementById('moto').value;
+			const status = document.getElementById('status').value;
+			const area = document.getElementById('area').value.trim();
+			
+			if (!moto || !status || !area) {
+				e.preventDefault();
+				alert('Por favor, preencha todos os campos obrigatórios.');
+				return;
+			}
+		});
+
+		// Auto-complete para área baseado no status
+		document.getElementById('status').addEventListener('change', function(e) {
+			const areaInput = document.getElementById('area');
+			const status = e.target.value;
+			
+			const areaSuggestions = {
+				'PENDENTE': 'Recepção',
+				'REPARO_SIMPLES': 'Oficina',
+				'DANOS_ESTRUTURAIS': 'Oficina',
+				'MOTOR_DEFEITUOSO': 'Oficina',
+				'MANUTENCAO_AGENDADA': 'Oficina',
+				'PRONTA': 'Vendas',
+				'SEM_PLACA': 'Pátio',
+				'ALUGADA': 'Em Uso',
+				'AGUARDANDO_ALUGUEL': 'Vendas'
+			};
+			
+			if (areaSuggestions[status] && !areaInput.value) {
+				areaInput.value = areaSuggestions[status];
+			}
+		});
+	</script>
+</body>
+
+</html>

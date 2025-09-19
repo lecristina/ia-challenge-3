@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos :: cabecalho('Cadastro de Usuário')}"></head>
+
+<body>
+	<!-- Navbar -->
+	<nav th:replace="~{fragmentos :: navbar}"></nav>
+
+	<div class="container-fluid py-4">
+		<div th:replace="~{fragmentos :: saudacoes(${usuario_logado})}"></div>
+
+		<!-- Alerts -->
+		<div th:if="${param.sucesso}" class="alert alert-success alert-dismissible fade show" role="alert">
+			<i class="fas fa-check-circle me-2"></i> <strong>Sucesso!</strong>
+			Usuário cadastrado com sucesso!
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+		
+		<div th:if="${erro}" class="alert alert-danger-custom alert-dismissible fade show" role="alert">
+			<i class="fas fa-exclamation-triangle me-2"></i> <strong>Erro!</strong>
+			<span th:text="${erro}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+
+		<!-- Header -->
+		<div class="row mb-4">
+			<div class="col-12">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<h2 class="mb-0">
+							<i class="fas fa-user-plus me-2"></i> Cadastro de Usuário
+						</h2>
+						<p class="text-muted mb-0">Cadastre um novo usuário no sistema</p>
+					</div>
+					<div>
+						<a href="/motos" class="btn btn-secondary-custom btn-custom">
+							<i class="fas fa-arrow-left me-1"></i>Voltar
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Formulário de cadastro de usuário -->
+		<form th:action="@{/insere_usuario}" th:object="${usuario}" method="post" id="usuarioForm">
+    <!-- Nome da Filial -->
+    <div class="mb-4">
+        <label for="nomeFilial" class="form-label-custom">
+            <i class="fas fa-building me-1"></i>Nome da Filial *
+        </label>
+        <input class="form-control form-control-custom" type="text"
+            th:field="*{nomeFilial}" id="nomeFilial"
+            placeholder="Digite o nome da filial" required maxlength="100"
+            th:classappend="${#fields.hasErrors('nomeFilial')} ? 'is-invalid' : ''">
+        <div th:if="${#fields.hasErrors('nomeFilial')}" class="invalid-feedback">
+            <span th:errors="*{nomeFilial}"></span>
+        </div>
+    </div>
+
+    <!-- Email -->
+    <div class="mb-4">
+        <label for="email" class="form-label-custom">
+            <i class="fas fa-envelope me-1"></i>Email *
+        </label>
+        <input class="form-control form-control-custom" type="email"
+            th:field="*{email}" id="email"
+            placeholder="Digite o email" required maxlength="100"
+            th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+        <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
+            <span th:errors="*{email}"></span>
+        </div>
+    </div>
+
+    <!-- Senha -->
+    <div class="mb-4">
+        <label for="senhaHash" class="form-label-custom">
+            <i class="fas fa-lock me-1"></i>Senha *
+        </label>
+        <div class="input-group">
+            <input class="form-control form-control-custom" type="password"
+                th:field="*{senhaHash}" id="senhaHash"
+                placeholder="Digite uma senha segura" required minlength="6"
+                th:classappend="${#fields.hasErrors('senhaHash')} ? 'is-invalid' : ''">
+        </div>
+        <div th:if="${#fields.hasErrors('senhaHash')}" class="invalid-feedback">
+            <span th:errors="*{senhaHash}"></span>
+        </div>
+        <div class="form-text">
+            <i class="fas fa-info-circle me-1"></i> Mínimo de 6 caracteres.
+            Use letras, números e símbolos.
+        </div>
+    </div>
+
+    <!-- CNPJ -->
+    <div class="mb-4">
+        <label for="cnpj" class="form-label-custom">
+            <i class="fas fa-id-card me-1"></i>CNPJ *
+        </label>
+        <input class="form-control form-control-custom" type="text"
+            th:field="*{cnpj}" id="cnpj"
+            placeholder="Ex: 12.345.678/0001-90" required maxlength="18"
+            th:classappend="${#fields.hasErrors('cnpj')} ? 'is-invalid' : ''">
+        <div th:if="${#fields.hasErrors('cnpj')}" class="invalid-feedback">
+            <span th:errors="*{cnpj}"></span>
+        </div>
+    </div>
+
+    <!-- Endereço -->
+    <div class="mb-4">
+        <label for="endereco" class="form-label-custom">
+            <i class="fas fa-map-marker-alt me-1"></i>Endereço
+        </label>
+        <input class="form-control form-control-custom" type="text"
+            th:field="*{endereco}" id="endereco"
+            placeholder="Ex: Rua das Flores, 123 - Centro" maxlength="255">
+    </div>
+
+    <!-- Telefone -->
+    <div class="mb-4">
+        <label for="telefone" class="form-label-custom">
+            <i class="fas fa-phone me-1"></i>Telefone
+        </label>
+        <input class="form-control form-control-custom" type="tel"
+            th:field="*{telefone}" id="telefone"
+            placeholder="Ex: (11) 99999-9999" maxlength="15">
+    </div>
+
+    <!-- Perfil -->
+    <div class="mb-4">
+        <label for="perfil" class="form-label-custom">
+            <i class="fas fa-user-tag me-1"></i>Perfil de Acesso *
+        </label>
+        <select class="form-select form-control-custom"
+            th:field="*{perfil}" id="perfil" required
+            th:classappend="${#fields.hasErrors('perfil')} ? 'is-invalid' : ''">
+            <option value="">Selecione um perfil</option>
+            <option th:each="p : ${perfis}" th:value="${p}" th:text="${p.descricao}"></option>
+        </select>
+        <div th:if="${#fields.hasErrors('perfil')}" class="invalid-feedback">
+            <span th:errors="*{perfil}"></span>
+        </div>
+    </div>
+
+    <!-- Botões -->
+    <div class="d-flex justify-content-between">
+        <a href="/motos" class="btn btn-secondary-custom btn-custom">
+            Voltar
+        </a>
+        <button type="submit" class="btn btn-primary-custom btn-custom" id="btnCadastrar">
+            <i class="fas fa-save me-1"></i>Cadastrar Usuário
+        </button>
+    </div>
+
+</form>
+	</div>
+
+	<!-- Scripts -->
+	<script th:inline="javascript">
+    // Função mostrar loading
+    function mostrarLoading(btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Carregando...';
+    }
+
+    // Função para formatar CNPJ
+    function formatarCNPJ(cnpj) {
+        return cnpj.replace(/\D/g, '')
+                   .replace(/^(\d{2})(\d)/, '$1.$2')
+                   .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+                   .replace(/\.(\d{3})(\d)/, '.$1/$2')
+                   .replace(/(\d{4})(\d)/, '$1-$2');
+    }
+
+    // Aplicar formatação de CNPJ em tempo real
+    document.getElementById('cnpj').addEventListener('input', function(e) {
+        e.target.value = formatarCNPJ(e.target.value);
+    });
+
+    // Função para formatar telefone
+    function formatarTelefone(telefone) {
+        return telefone.replace(/\D/g, '')
+                       .replace(/^(\d{2})(\d)/, '($1) $2')
+                       .replace(/(\d{4})(\d)/, '$1-$2')
+                       .replace(/(\d{5})(\d)/, '$1-$2');
+    }
+
+    // Aplicar formatação de telefone em tempo real
+    document.getElementById('telefone').addEventListener('input', function(e) {
+        e.target.value = formatarTelefone(e.target.value);
+    });
+
+    // Validação em tempo real
+    function validarCampo(campo, tipo) {
+        const valor = campo.value.trim();
+        const feedback = campo.parentNode.querySelector('.invalid-feedback') || 
+                        document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        
+        let isValid = true;
+        let mensagem = '';
+
+        switch(tipo) {
+            case 'nome':
+                if (valor.length < 2) {
+                    isValid = false;
+                    mensagem = 'Nome deve ter pelo menos 2 caracteres';
+                }
+                break;
+            case 'email':
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(valor)) {
+                    isValid = false;
+                    mensagem = 'Digite um email válido';
+                }
+                break;
+            case 'senha':
+                if (valor.length < 6) {
+                    isValid = false;
+                    mensagem = 'Senha deve ter pelo menos 6 caracteres';
+                } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(valor)) {
+                    isValid = false;
+                    mensagem = 'Senha deve conter letras maiúsculas, minúsculas e números';
+                }
+                break;
+            case 'cnpj':
+                const cnpjLimpo = valor.replace(/\D/g, '');
+                if (cnpjLimpo.length !== 14) {
+                    isValid = false;
+                    mensagem = 'CNPJ deve ter 14 dígitos';
+                }
+                break;
+        }
+
+        campo.classList.toggle('is-invalid', !isValid);
+        campo.classList.toggle('is-valid', isValid);
+        
+        if (!isValid) {
+            feedback.textContent = mensagem;
+            campo.parentNode.appendChild(feedback);
+        } else {
+            feedback.remove();
+        }
+
+        return isValid;
+    }
+
+    // Aplicar validação em tempo real
+    document.getElementById('nomeFilial').addEventListener('blur', () => validarCampo(document.getElementById('nomeFilial'), 'nome'));
+    document.getElementById('email').addEventListener('blur', () => validarCampo(document.getElementById('email'), 'email'));
+    document.getElementById('senhaHash').addEventListener('blur', () => validarCampo(document.getElementById('senhaHash'), 'senha'));
+    document.getElementById('cnpj').addEventListener('blur', () => validarCampo(document.getElementById('cnpj'), 'cnpj'));
+
+    // Validação do formulário
+    document.getElementById('usuarioForm').addEventListener('submit', function(e) {
+        console.log('Formulário sendo enviado...');
+        
+        const nomeFilial = document.getElementById('nomeFilial').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const senha = document.getElementById('senhaHash').value;
+        const cnpj = document.getElementById('cnpj').value.replace(/\D/g, '');
+        const perfil = document.getElementById('perfil').value;
+
+        // Validar todos os campos
+        const nomeValido = validarCampo(document.getElementById('nomeFilial'), 'nome');
+        const emailValido = validarCampo(document.getElementById('email'), 'email');
+        const senhaValida = validarCampo(document.getElementById('senhaHash'), 'senha');
+        const cnpjValido = validarCampo(document.getElementById('cnpj'), 'cnpj');
+
+        if (!nomeValido || !emailValido || !senhaValida || !cnpjValido || !perfil) {
+            e.preventDefault();
+            alert('Por favor, corrija os erros no formulário antes de continuar.');
+            return;
+        }
+
+        console.log('Validação passou, enviando formulário...');
+        
+        // Se chegou aqui, está tudo ok: mostrar loading no botão
+        mostrarLoading(document.getElementById('btnCadastrar'));
+    });
+	</script>
+</body>
+</html>

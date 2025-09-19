@@ -1,0 +1,161 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos :: cabecalho('Operação de Moto')}" />
+
+<body>
+	<!-- Navbar -->
+	<nav th:replace="~{fragmentos :: navbar}" />
+
+	<div class="container-fluid py-4">
+		<div th:replace="~{fragmentos :: saudacoes(${usuario_logado})}" />
+
+		<!-- Alerts -->
+		<div th:if="${param.erro}"
+			class="alert alert-danger-custom alert-dismissible fade show"
+			role="alert">
+			<i class="fas fa-exclamation-triangle me-2"></i> <strong>Erro!</strong>
+			<span th:text="${param.erro}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+
+		<!-- Header -->
+		<div class="row mb-4">
+			<div class="col-12">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<h2 class="mb-0">
+							<i class="fas fa-play-circle me-2"></i> Iniciar Operação
+						</h2>
+						<p class="text-muted mb-0">Inicie uma nova operação com a moto selecionada</p>
+					</div>
+					<div class="action-buttons">
+						<a href="/motos" class="btn btn-secondary-custom btn-custom">
+							<i class="fas fa-arrow-left me-1"></i>Voltar
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Informações da Moto -->
+		<div class="row mb-4">
+			<div class="col-12">
+				<div class="card-custom">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="fas fa-motorcycle me-2"></i> Informações da Moto
+						</h5>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-md-3">
+								<strong>Placa:</strong>
+								<span th:text="${moto.placa}" class="badge badge-custom bg-primary"></span>
+							</div>
+							<div class="col-md-3">
+								<strong>Chassi:</strong>
+								<span th:text="${moto.chassi}"></span>
+							</div>
+							<div class="col-md-3">
+								<strong>Motor:</strong>
+								<span th:text="${moto.motor ?: 'N/A'}"></span>
+							</div>
+							<div class="col-md-3">
+								<strong>Filial:</strong>
+								<span th:text="${moto.usuario.nomeFilial}"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Formulário de Operação -->
+		<div class="row">
+			<div class="col-md-8">
+				<div class="card-custom">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="fas fa-clipboard-list me-2"></i> Dados da Operação
+						</h5>
+					</div>
+					<div class="card-body">
+						<form th:action="@{/motos/{id}/operacao(id=${moto.id})}" method="post">
+							<div class="mb-4">
+								<label for="tipoOperacao" class="form-label-custom">
+									<i class="fas fa-tasks me-1"></i>Tipo de Operação
+								</label>
+								<select class="form-control form-control-custom" id="tipoOperacao" name="tipoOperacao" required>
+									<option value="">Selecione o tipo de operação</option>
+									<option th:each="tipo : ${tiposOperacao}" 
+											th:value="${tipo}" 
+											th:text="${tipo.descricao}"></option>
+								</select>
+							</div>
+
+							<div class="mb-4">
+								<label for="descricao" class="form-label-custom">
+									<i class="fas fa-comment me-1"></i>Descrição da Operação
+								</label>
+								<textarea class="form-control form-control-custom" 
+										  id="descricao" 
+										  name="descricao" 
+										  rows="4" 
+										  placeholder="Descreva os detalhes da operação..."
+										  required></textarea>
+								<div class="form-text">Seja específico sobre o destino, cliente ou motivo da operação.</div>
+							</div>
+
+							<div class="d-grid gap-2 d-md-flex justify-content-md-end">
+								<a href="/motos" class="btn btn-secondary-custom btn-custom me-md-2">
+									<i class="fas fa-times me-1"></i>Cancelar
+								</a>
+								<button type="submit" class="btn btn-primary-custom btn-custom">
+									<i class="fas fa-play me-1"></i>Iniciar Operação
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<!-- Informações Adicionais -->
+			<div class="col-md-4">
+				<div class="card-custom">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="fas fa-info-circle me-2"></i> Informações Importantes
+						</h5>
+					</div>
+					<div class="card-body">
+						<div class="alert alert-info-custom">
+							<h6 class="alert-heading">
+								<i class="fas fa-lightbulb me-1"></i>Dicas
+							</h6>
+							<ul class="mb-0">
+								<li>Certifique-se de que a moto está em boas condições</li>
+								<li>Anote o endereço de destino completo</li>
+								<li>Verifique se há documentos necessários</li>
+								<li>Confirme o horário de entrega/coleta</li>
+							</ul>
+						</div>
+
+						<div class="alert alert-warning-custom">
+							<h6 class="alert-heading">
+								<i class="fas fa-exclamation-triangle me-1"></i>Atenção
+							</h6>
+							<p class="mb-0">Após iniciar a operação, a moto ficará indisponível para outras operações até ser finalizada.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<div th:replace="~{fragmentos :: scripts}" />
+</body>
+
+</html>

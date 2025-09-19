@@ -1,0 +1,64 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos :: cabecalho('Relatórios')}" />
+
+<body>
+	<form th:replace="~{fragmentos :: form-logout}" />
+
+	<div class="container py-4">
+		<div th:replace="~{fragmentos :: saudacoes(${usuario_logado})}" />
+
+		<h1 class="mb-4">Relatórios do Sistema</h1>
+
+		<div class="row g-3">
+			<div class="col-md-6">
+				<div class="card h-100">
+					<div class="card-header">Relatório de Motos</div>
+					<div class="card-body">
+						<p class="card-text">Relatório completo com todas as motos
+							cadastradas no sistema.</p>
+						<a href="/relatorios/motos" class="btn btn-primary">Gerar
+							Relatório</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="card h-100">
+					<div class="card-header">Relatório de Status</div>
+					<div class="card-body">
+						<p class="card-text">Relatório com status atual de todas as
+							motos.</p>
+						<a href="/relatorios/status" class="btn btn-primary">Gerar
+							Relatório</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row g-3 mt-3">
+			<div class="col-md-6">
+				<div class="card h-100">
+					<div class="card-header">Relatório de Operações</div>
+					<div class="card-body">
+						<p class="card-text">Relatório com todas as operações de
+							check-in e check-out.</p>
+						<a href="/relatorios/operacoes" class="btn btn-primary">Gerar
+							Relatório</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row mt-4">
+			<div class="col-12 d-flex gap-2">
+				<a href="/motos" class="btn btn-secondary">Lista de Motos</a> <a
+					href="/dashboard" class="btn btn-info">Dashboard</a> <a
+					href="/index" class="btn btn-outline-secondary">Voltar ao
+					Início</a>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos :: cabecalho('Relatório de Status')}" />
+
+<body>
+	<form th:replace="~{fragmentos :: form-logout}" />
+	<div class="container py-4">
+		<div th:replace="~{fragmentos :: saudacoes(${usuario_logado})}" />
+
+		<h1>Relatório de Status das Motos</h1>
+		<p class="text-muted">
+			Gerado em: <span
+				th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+		</p>
+
+		<div class="table-responsive">
+			<table class="table table-striped table-hover">
+				<thead class="table-dark">
+					<tr>
+						<th>ID</th>
+						<th>Moto</th>
+						<th>Status</th>
+						<th>Área</th>
+						<th>Usuário</th>
+						<th>Data Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="statusMoto : ${statusMotos}">
+						<td th:text="${statusMoto.id}"></td>
+						<td
+							th:text="${statusMoto.moto.placa + ' - ' + statusMoto.moto.chassi}"></td>
+							<td>
+								<span class="badge"
+									  th:classappend="${statusMoto.status.cssClass}"
+									  th:text="${statusMoto.status.descricao}">
+								</span>
+							</td>
+							
+						<td th:text="${statusMoto.area}"></td>
+						<td th:text="${statusMoto.usuario.nomeFilial}"></td>
+						<td
+							th:text="${#temporals.format(statusMoto.dataStatus,'dd/MM/yyyy HH:mm')}"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="alert alert-info">
+			<strong>Total de Status:</strong> <span
+				th:text="${#lists.size(statusMotos)}"></span>
+		</div>
+
+		<div class="d-flex gap-2">
+			<button onclick="window.print()" class="btn btn-primary">Imprimir</button>
+			<a href="/relatorios" class="btn btn-secondary">Voltar aos
+				Relatórios</a> <a href="/motos/operacoes"
+				class="btn btn-outline-secondary">Status das Motos</a>
+		</div>
+	</div>
+</body>
+</html>

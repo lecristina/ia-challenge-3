@@ -1,0 +1,54 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos :: cabecalho('Nova Operação')}" />
+
+<body>
+	<form th:replace="~{fragmentos :: form-logout}" />
+
+	<div class="container">
+		<div th:replace="~{fragmentos :: saudacoes(${usuario_logado})}" />
+
+		<div class="row">
+			<h1>Nova Operação (Check-in / Check-out)</h1>
+		</div>
+
+		<form th:object="${operacao}" action="/operacoes/salvar" method="post">
+			<div class="mb-3">
+				<label for="moto" class="form-label">Moto:</label>
+				<select class="form-select" th:field="*{moto.id}" id="moto" required>
+					<option value="">Selecione uma moto</option>
+					<option th:each="m : ${motos}" th:value="${m.id}"
+						th:text="${m.placa + ' - ' + m.chassi}"></option>
+				</select>
+			</div>
+			<div class="mb-3">
+				<label for="tipoOperacao" class="form-label">Tipo de Operação:</label>
+				<select class="form-select" th:field="*{tipoOperacao}" id="tipoOperacao" required>
+					<option value="">Selecione o tipo de operação</option>
+					<option th:each="tipo : ${tiposOperacao}" th:value="${tipo}"
+						th:text="${tipo.descricao}"></option>
+				</select>
+			</div>
+			<div class="mb-3">
+				<label for="descricao" class="form-label">Descrição:</label>
+				<textarea class="form-control" th:field="*{descricao}" id="descricao" 
+					rows="3" placeholder="Digite a descrição da operação..."></textarea>
+			</div>
+			<input type="hidden" name="_csrf" th:value="${_csrf.token}">
+			<button type="submit" class="btn btn-primary">Registrar Operação</button>
+		</form>
+
+		<div class="row mt-3">
+			<a href="/operacoes" class="btn btn-secondary">Voltar para Operações</a>
+			<a href="/motos" class="btn btn-outline-secondary">Lista de Motos</a>
+		</div>
+	</div>
+
+	<!-- Bootstrap JS -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+		crossorigin="anonymous"></script>
+</body>
+
+</html>

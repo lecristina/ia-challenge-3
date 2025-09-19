@@ -1,0 +1,59 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos :: cabecalho('Relatório de Operações')}" />
+
+<body>
+	<form th:replace="~{fragmentos :: form-logout}" />
+	<div class="container py-4">
+		<div th:replace="~{fragmentos :: saudacoes(${usuario_logado})}" />
+
+		<h1>Relatório de Operações</h1>
+		<p class="text-muted">
+			Gerado em: <span
+				th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+		</p>
+
+		<div class="table-responsive">
+			<table class="table table-striped table-hover">
+				<thead class="table-dark">
+					<tr>
+						<th>ID</th>
+						<th>Moto</th>
+						<th>Tipo</th>
+						<th>Usuário</th>
+						<th>Observações</th>
+						<th>Data/Hora</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="operacao : ${operacoes}">
+						<td th:text="${operacao.id}"></td>
+						<td
+							th:text="${operacao.moto.placa + ' - ' + operacao.moto.chassi}"></td>
+						<td><span class="badge"
+							th:classappend="${operacao.tipoOperacao.name() == 'CHECK_IN'} ? 'bg-success' : 'bg-warning'"
+							th:text="${operacao.tipoOperacao.descricao}"></span></td>
+						<td th:text="${operacao.usuario.nomeFilial}"></td>
+						<td th:text="${operacao.descricao}"></td>
+						<td
+							th:text="${#temporals.format(operacao.dataOperacao,'dd/MM/yyyy HH:mm')}"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="alert alert-info">
+			<strong>Total de Operações:</strong> <span
+				th:text="${#lists.size(operacoes)}"></span>
+		</div>
+
+		<div class="d-flex gap-2">
+			<button onclick="window.print()" class="btn btn-primary">Imprimir</button>
+			<a href="/relatorios" class="btn btn-secondary">Voltar aos
+				Relatórios</a> <a href="/operacoes" class="btn btn-outline-secondary">Operações</a>
+		</div>
+	</div>
+</body>
+</html>

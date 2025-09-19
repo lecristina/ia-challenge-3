@@ -1,0 +1,195 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos :: cabecalho('Cadastro de Moto')}" />
+
+<body>
+	<!-- Navbar -->
+	<nav th:replace="~{fragmentos :: navbar}" />
+
+	<div class="container-fluid py-4">
+		<div th:replace="~{fragmentos :: saudacoes(${usuario_logado})}" />
+
+		<!-- Alerts -->
+		<div th:if="${param.erro}" class="alert alert-danger-custom alert-dismissible fade show" role="alert">
+			<i class="fas fa-exclamation-triangle me-2"></i>
+			<strong>Erro!</strong> <span th:text="${param.erro[0]}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+		
+		<div th:if="${erro}" class="alert alert-danger-custom alert-dismissible fade show" role="alert">
+			<i class="fas fa-exclamation-triangle me-2"></i>
+			<strong>Erro!</strong> <span th:text="${erro}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+
+		<!-- Header -->
+		<div class="row mb-4">
+			<div class="col-12">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<h2 class="mb-0">
+							<i class="fas fa-motorcycle me-2"></i>
+							<span th:text="${editando != null and editando ? 'Editar Moto' : 'Cadastrar Nova Moto'}"></span>
+						</h2>
+						<p class="text-muted mb-0">
+							<span th:text="${editando != null and editando ? 'Atualize os dados da moto' : 'Preencha os dados para cadastrar uma nova moto'}"></span>
+						</p>
+					</div>
+					<div>
+						<a href="/motos" class="btn btn-secondary-custom btn-custom">
+							<i class="fas fa-arrow-left me-1"></i>Voltar
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Formulário -->
+		<div class="row justify-content-center">
+			<div class="col-lg-8">
+				<div class="card-custom">
+					<div class="card-body p-4">
+						<form th:object="${moto}" 
+							  th:action="${editando != null and editando ? '/motos/atualizar' : '/motos/salvar'}" 
+							  method="post" 
+							  id="motoForm">
+							
+							<!-- Campo hidden para ID (necessário para atualização) -->
+							<input type="hidden" th:field="*{id}" />
+							
+							<!-- Placa -->
+							<div class="mb-4">
+								<label for="placa" class="form-label-custom">
+									<i class="fas fa-id-card me-1"></i>Placa da Moto *
+								</label>
+								<input class="form-control form-control-custom" 
+									   type="text" 
+									   th:field="*{placa}" 
+									   id="placa" 
+									   placeholder="Ex: ABC-1234 ou ABC1234"
+									   required
+									   maxlength="10">
+								<div class="form-text">
+									<i class="fas fa-info-circle me-1"></i>
+									Digite a placa da moto (formato: ABC-1234 ou ABC1234)
+								</div>
+							</div>
+
+							<!-- Chassi -->
+							<div class="mb-4">
+								<label for="chassi" class="form-label-custom">
+									<i class="fas fa-barcode me-1"></i>Número do Chassi *
+								</label>
+								<input class="form-control form-control-custom" 
+									   type="text" 
+									   th:field="*{chassi}" 
+									   id="chassi" 
+									   placeholder="Ex: 9BWZZZZ377Z123456"
+									   required
+									   maxlength="50">
+								<div class="form-text">
+									<i class="fas fa-info-circle me-1"></i>
+									Digite o número único do chassi da moto
+								</div>
+							</div>
+
+							<!-- Motor -->
+							<div class="mb-4">
+								<label for="motor" class="form-label-custom">
+									<i class="fas fa-cog me-1"></i>Motor (Opcional)
+								</label>
+								<input class="form-control form-control-custom" 
+									   type="text" 
+									   th:field="*{motor}" 
+									   id="motor" 
+									   placeholder="Ex: 150cc, 250cc, 300cc"
+									   maxlength="50">
+								<div class="form-text">
+									<i class="fas fa-info-circle me-1"></i>
+									Digite a especificação do motor (opcional)
+								</div>
+							</div>
+
+							<!-- Informações adicionais -->
+							<div class="mb-4">
+								<div class="alert alert-info-custom">
+									<i class="fas fa-lightbulb me-2"></i>
+									<strong>Dica:</strong> Os campos marcados com * são obrigatórios. 
+									O sistema irá validar se a placa e chassi já existem antes de salvar.
+								</div>
+							</div>
+
+							<!-- Botões -->
+							<div class="d-flex justify-content-between">
+								<a href="/motos" class="btn btn-secondary-custom btn-custom">
+									<i class="fas fa-times me-1"></i>Cancelar
+								</a>
+								<button type="submit" 
+										class="btn btn-primary-custom btn-custom"
+										th:onclick="'mostrarLoading(this)'">
+									<i class="fas fa-save me-1"></i>
+									<span th:text="${editando != null and editando ? 'Atualizar Moto' : 'Cadastrar Moto'}"></span>
+								</button>
+							</div>
+
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Informações do usuário -->
+		<div class="row mt-4">
+			<div class="col-12">
+				<div class="card-custom">
+					<div class="card-body">
+						<h6 class="card-title">
+							<i class="fas fa-user me-2"></i>Informações do Usuário
+						</h6>
+						<p class="card-text mb-0">
+							<strong>Filial:</strong> <span th:text="${usuario_logado?.nomeFilial}"></span><br>
+							<strong>Email:</strong> <span th:text="${usuario_logado?.email}"></span><br>
+							<strong>Perfil:</strong> <span th:text="${usuario_logado?.perfil?.descricao}"></span>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script th:inline="javascript">
+		// Validação do formulário
+		document.getElementById('motoForm').addEventListener('submit', function(e) {
+			const placa = document.getElementById('placa').value.trim();
+			const chassi = document.getElementById('chassi').value.trim();
+			
+			if (!placa || !chassi) {
+				e.preventDefault();
+				alert('Por favor, preencha todos os campos obrigatórios.');
+				return;
+			}
+			
+			// Validação básica da placa
+			const placaRegex = /^[A-Z]{3}[-]?[0-9]{4}$/;
+			if (!placaRegex.test(placa)) {
+				e.preventDefault();
+				alert('Formato de placa inválido. Use o formato ABC-1234 ou ABC1234');
+				return;
+			}
+		});
+
+		// Máscara para placa
+		document.getElementById('placa').addEventListener('input', function(e) {
+			let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+			if (value.length > 3) {
+				value = value.substring(0, 3) + '-' + value.substring(3, 7);
+			}
+			e.target.value = value;
+		});
+	</script>
+</body>
+
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos :: cabecalho('Relatório de Operações')}" />
+
+<body>
+	<!-- Navbar -->
+	<nav th:replace="~{fragmentos :: navbar}" />
+
+	<div class="container-fluid py-4">
+		<div th:replace="~{fragmentos :: saudacoes(${usuario_logado})}" />
+
+		<!-- Alerts -->
+		<div th:if="${erro}"
+			class="alert alert-danger-custom alert-dismissible fade show"
+			role="alert">
+			<i class="fas fa-exclamation-triangle me-2"></i> <strong>Erro!</strong>
+			<span th:text="${erro}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+
+		<!-- Header -->
+		<div class="row mb-4">
+			<div class="col-12">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<h2 class="mb-0">
+							<i class="fas fa-chart-line me-2"></i> Relatório de Operações
+						</h2>
+						<p class="text-muted mb-0">Análise detalhada das operações por período</p>
+					</div>
+					<div class="action-buttons">
+						<a href="/relatorios" class="btn btn-secondary-custom btn-custom">
+							<i class="fas fa-arrow-left me-1"></i>Voltar
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Filtros -->
+		<div class="row mb-4">
+			<div class="col-12">
+				<div class="card-custom">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="fas fa-filter me-2"></i> Filtros
+						</h5>
+					</div>
+					<div class="card-body">
+						<form method="get" action="/relatorios/operacoes-periodo">
+							<div class="row">
+								<div class="col-md-4">
+									<label for="dataInicio" class="form-label-custom">Data Início</label>
+									<input type="date" class="form-control form-control-custom" 
+										   id="dataInicio" name="dataInicio" 
+										   th:value="${dataInicio}">
+								</div>
+								<div class="col-md-4">
+									<label for="dataFim" class="form-label-custom">Data Fim</label>
+									<input type="date" class="form-control form-control-custom" 
+										   id="dataFim" name="dataFim" 
+										   th:value="${dataFim}">
+								</div>
+								<div class="col-md-4 d-flex align-items-end">
+									<button type="submit" class="btn btn-primary-custom btn-custom me-2">
+										<i class="fas fa-search me-1"></i>Filtrar
+									</button>
+									<a th:href="@{/relatorios/operacoes-periodo/exportar(dataInicio=${dataInicio}, dataFim=${dataFim})}" 
+									   class="btn btn-success-custom btn-custom" 
+									   th:if="${dataInicio != null and dataFim != null}">
+										<i class="fas fa-download me-1"></i>Exportar CSV
+									</a>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Estatísticas -->
+		<div class="row mb-4" th:if="${totalOperacoes != null}">
+			<div class="col-md-3">
+				<div class="stats-card">
+					<div class="stats-number" th:text="${totalOperacoes}">0</div>
+					<div class="stats-label">Total de Operações</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="stats-card">
+					<div class="stats-number" th:text="${entregas}">0</div>
+					<div class="stats-label">Entregas</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="stats-card">
+					<div class="stats-number" th:text="${coletas}">0</div>
+					<div class="stats-label">Coletas</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="stats-card">
+					<div class="stats-number" th:text="${manutencoes}">0</div>
+					<div class="stats-label">Manutenções</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Tabela de Operações -->
+		<div class="row" th:if="${operacoes != null and !operacoes.isEmpty()}">
+			<div class="col-12">
+				<div class="card-custom">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="fas fa-list me-2"></i> Operações
+							<span class="badge badge-custom bg-primary ms-2" th:text="${#lists.size(operacoes)}"></span>
+						</h5>
+					</div>
+					<div class="card-body p-0">
+						<div class="table-responsive">
+							<table class="table table-custom mb-0">
+								<thead>
+									<tr>
+										<th scope="col"><i class="fas fa-hashtag me-1"></i>ID</th>
+										<th scope="col"><i class="fas fa-tasks me-1"></i>Tipo</th>
+										<th scope="col"><i class="fas fa-motorcycle me-1"></i>Moto</th>
+										<th scope="col"><i class="fas fa-user me-1"></i>Operador</th>
+										<th scope="col"><i class="fas fa-comment me-1"></i>Descrição</th>
+										<th scope="col"><i class="fas fa-calendar me-1"></i>Data/Hora</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="operacao : ${operacoes}" class="fade-in">
+										<th scope="row" th:text="${operacao.id}"></th>
+										<td>
+											<span class="badge badge-custom" 
+												  th:classappend="${operacao.tipoOperacao.name() == 'ENTREGA'} ? 'bg-success' : 
+																  (operacao.tipoOperacao.name() == 'COLETA') ? 'bg-info' : 
+																  (operacao.tipoOperacao.name() == 'MANUTENCAO') ? 'bg-warning' : 'bg-secondary'">
+												<i th:class="${operacao.tipoOperacao.name() == 'ENTREGA'} ? 'fas fa-truck' : 
+															(operacao.tipoOperacao.name() == 'COLETA') ? 'fas fa-box' : 
+															(operacao.tipoOperacao.name() == 'MANUTENCAO') ? 'fas fa-tools' : 'fas fa-exchange-alt'"
+												   class="me-1"></i>
+												<span th:text="${operacao.tipoOperacao.descricao}"></span>
+											</span>
+										</td>
+										<td>
+											<span class="badge badge-custom bg-primary">
+												<i class="fas fa-id-card me-1"></i>
+												<span th:text="${operacao.moto.placa}"></span>
+											</span>
+										</td>
+										<td th:text="${operacao.usuario.nomeFilial}"></td>
+										<td>
+											<span th:text="${operacao.descricao}" 
+												  th:title="${operacao.descricao}"
+												  class="text-truncate d-inline-block" 
+												  style="max-width: 200px;"></span>
+										</td>
+										<td th:text="${#temporals.format(operacao.dataOperacao,'dd/MM/yyyy HH:mm')}"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Mensagem quando não há dados -->
+		<div class="row" th:if="${operacoes == null or operacoes.isEmpty()}">
+			<div class="col-12">
+				<div class="card-custom">
+					<div class="card-body text-center py-5">
+						<i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+						<h5 class="text-muted">Nenhuma operação encontrada</h5>
+						<p class="text-muted">Selecione um período para visualizar as operações</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<div th:replace="~{fragmentos :: scripts}" />
+</body>
+
+</html>

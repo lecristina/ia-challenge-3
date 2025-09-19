@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Motos - TrackZone</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .mapa {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            margin: 20px auto;
+            border: 3px solid #333;
+            background: #e8f5e8;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .zona {
+            position: absolute;
+            border: 2px dashed #666;
+            background: rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            font-size: 12px;
+        }
+        .entrada { 
+            top: 10px; left: 10px; width: 200px; height: 80px; 
+            border-color: #28a745; background: rgba(40, 167, 69, 0.2);
+        }
+        .saida { 
+            top: 10px; right: 10px; width: 200px; height: 80px; 
+            border-color: #dc3545; background: rgba(220, 53, 69, 0.2);
+        }
+        .estacionamento { 
+            bottom: 10px; left: 10px; width: 300px; height: 120px; 
+            border-color: #007bff; background: rgba(0, 123, 255, 0.2);
+        }
+        .manutencao { 
+            bottom: 10px; right: 10px; width: 200px; height: 120px; 
+            border-color: #ffc107; background: rgba(255, 193, 7, 0.2);
+        }
+        
+        .moto {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #ff4444;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 8px rgba(255,68,68,0.8);
+            cursor: pointer;
+            z-index: 10;
+        }
+        .moto.entrada { background: #28a745; }
+        .moto.saida { background: #dc3545; }
+        .moto.estacionamento { background: #007bff; }
+        .moto.manutencao { background: #ffc107; }
+        
+        .coordenadas {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .controles {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin: 5px;
+            min-width: 100px;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .instrucoes {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏍️ Mapa de Motos - TrackZone</h1>
+        <p>Sistema simples: adicione motos e veja elas aparecerem no mapa!</p>
+        
+        <div class="instrucoes">
+            <h3>📋 Como usar:</h3>
+            <ol>
+                <li>Execute: <code>python adicionar_motos_simples.py</code></li>
+                <li>Adicione motos uma por uma</li>
+                <li>Elas aparecerão como pontinhos coloridos no mapa</li>
+                <li>Clique nos botões abaixo para controlar</li>
+            </ol>
+        </div>
+        
+        <div class="controles">
+            <button class="btn btn-primary" onclick="carregarMotos()">🔄 Carregar Motos</button>
+            <button class="btn btn-success" onclick="iniciarAtualizacao()">▶️ Auto Atualizar</button>
+            <button class="btn btn-danger" onclick="pararAtualizacao()">⏸️ Parar</button>
+        </div>
+        
+        <div class="mapa" id="mapa">
+            <div class="zona entrada">
+                ENTRADA<br>
+                <small>(10,10)-(210,90)</small>
+            </div>
+            <div class="zona saida">
+                SAÍDA<br>
+                <small>(430,10)-(630,90)</small>
+            </div>
+            <div class="zona estacionamento">
+                ESTACIONAMENTO<br>
+                <small>(10,350)-(310,470)</small>
+            </div>
+            <div class="zona manutencao">
+                MANUTENÇÃO<br>
+                <small>(440,350)-(640,470)</small>
+            </div>
+            <div class="coordenadas" id="coordenadas">X: 0, Y: 0</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="total">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="entrada">0</div>
+                <div class="stat-label">Entrada</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="saida">0</div>
+                <div class="stat-label">Saída</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="estacionamento">0</div>
+                <div class="stat-label">Estacionamento</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="manutencao">0</div>
+                <div class="stat-label">Manutenção</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let motos = [];
+        let intervalId = null;
+        
+        function carregarMotos() {
+            console.log("🔄 Carregando motos...");
+            
+            fetch('http://localhost:8080/api/detections/recent')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`✅ ${data.length} motos carregadas`);
+                    mostrarMotos(data);
+                })
+                .catch(error => {
+                    console.error("❌ Erro:", error);
+                    alert("Erro ao carregar motos. Verifique se o Spring Boot está rodando!");
+                });
+        }
+        
+        function mostrarMotos(eventos) {
+            // Limpa motos existentes
+            document.querySelectorAll('.moto').forEach(moto => moto.remove());
+            motos = [];
+            
+            // Adiciona cada moto
+            eventos.forEach(evento => {
+                adicionarMoto(evento);
+            });
+            
+            atualizarStats();
+        }
+        
+        function adicionarMoto(evento) {
+            const moto = document.createElement('div');
+            moto.className = 'moto';
+            
+            // Posição
+            moto.style.left = evento.x + 'px';
+            moto.style.top = evento.y + 'px';
+            
+            // Cor baseada na zona
+            const zona = determinarZona(evento.x, evento.y);
+            moto.classList.add(zona);
+            
+            // Tooltip
+            moto.title = `${evento.placa || 'Moto'} - ${zona} - (${evento.x}, ${evento.y})`;
+            
+            // Adiciona ao mapa
+            document.getElementById('mapa').appendChild(moto);
+            motos.push({...evento, zona});
+            
+            console.log(`✅ Moto adicionada em (${evento.x}, ${evento.y}) - ${zona}`);
+        }
+        
+        function determinarZona(x, y) {
+            if (x >= 10 && x <= 210 && y >= 10 && y <= 90) return 'entrada';
+            if (x >= 430 && x <= 630 && y >= 10 && y <= 90) return 'saida';
+            if (x >= 10 && x <= 310 && y >= 350 && y <= 470) return 'estacionamento';
+            if (x >= 440 && x <= 640 && y >= 350 && y <= 470) return 'manutencao';
+            return 'entrada';
+        }
+        
+        function atualizarStats() {
+            const stats = {
+                total: motos.length,
+                entrada: 0,
+                saida: 0,
+                estacionamento: 0,
+                manutencao: 0
+            };
+            
+            motos.forEach(moto => {
+                stats[moto.zona]++;
+            });
+            
+            document.getElementById('total').textContent = stats.total;
+            document.getElementById('entrada').textContent = stats.entrada;
+            document.getElementById('saida').textContent = stats.saida;
+            document.getElementById('estacionamento').textContent = stats.estacionamento;
+            document.getElementById('manutencao').textContent = stats.manutencao;
+        }
+        
+        function iniciarAtualizacao() {
+            if (intervalId) clearInterval(intervalId);
+            console.log("▶️ Iniciando atualização automática...");
+            intervalId = setInterval(carregarMotos, 2000);
+        }
+        
+        function pararAtualizacao() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+                console.log("⏸️ Atualização parada");
+            }
+        }
+        
+        // Coordenadas do mouse
+        document.getElementById('mapa').addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = Math.round(e.clientX - rect.left);
+            const y = Math.round(e.clientY - rect.top);
+            document.getElementById('coordenadas').textContent = `X: ${x}, Y: ${y}`;
+        });
+        
+        // Inicia automaticamente
+        window.onload = function() {
+            console.log("🚀 Mapa carregado!");
+            carregarMotos();
+            iniciarAtualizacao();
+        };
+    </script>
+</body>
+</html>

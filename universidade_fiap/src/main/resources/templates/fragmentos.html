@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="cabecalho(titulo)">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="${titulo}"></title>
+<!-- Bootstrap CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+	crossorigin="anonymous">
+<!-- Font Awesome -->
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<!-- CSS Customizado -->
+<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+	<!-- Navbar -->
+	<nav th:fragment="navbar"
+		class="navbar navbar-expand-lg navbar-dark navbar-custom">
+		<div class="container">
+			<a class="navbar-brand" href="/index"> <i
+				class="fas fa-motorcycle me-2"></i> <strong>Gestão de Motos</strong>
+			</a>
+			<button class="navbar-toggler" type="button"
+				data-bs-toggle="collapse" data-bs-target="#navbarNav">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav me-auto">
+					<li class="nav-item"><a class="nav-link" href="/index"> <i
+							class="fas fa-home me-1"></i>Início
+					</a></li>
+					<li class="nav-item"><a class="nav-link" href="/motos"> <i
+							class="fas fa-motorcycle me-1"></i>Motos
+					</a></li>
+					<li class="nav-item"><a class="nav-link" href="/operacoes">
+							<i class="fas fa-exchange-alt me-1"></i>Operações
+					</a></li>
+					<!-- Relatórios apenas para ADMIN e GERENTE -->
+					<li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
+						<a class="nav-link" href="/relatorios"> <i
+							class="fas fa-chart-bar me-1"></i>Relatórios
+					</a>
+					</li>
+					<!-- Dashboard apenas para ADMIN e GERENTE -->
+					<li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
+						<a class="nav-link" href="/dashboard"> <i
+							class="fas fa-tachometer-alt me-1"></i>Dashboard
+					</a>
+					</li>
+				</ul>
+				<ul class="navbar-nav">
+					<li class="nav-item dropdown"><a
+						class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+						role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="fas fa-user me-1"></i> <span
+							th:text="${usuario_logado?.nomeFilial ?: 'Usuário'}"></span>
+					</a>
+						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<li><a class="dropdown-item" href="/usuario/novo"> <i
+									class="fas fa-user-plus me-2"></i>Cadastrar Usuário
+							</a></li>
+							<!-- Listar usuários apenas para ADMIN -->
+							<li sec:authorize="hasRole('ADMIN')"><a
+								class="dropdown-item" href="/usuario/lista"> <i
+									class="fas fa-users me-2"></i>Listar Usuários
+							</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li>
+								<form th:action="@{/logout}" method="post" class="d-inline">
+									<button type="submit" class="dropdown-item">
+										<i class="fas fa-sign-out-alt me-2"></i>Sair
+									</button>
+								</form>
+							</li>
+						</ul></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<!-- Formulário de logout simples (para páginas sem navbar) -->
+	<form th:fragment="form-logout" th:action="@{/logout}" method="post"
+		class="d-none">
+		<button type="submit">Sair</button>
+	</form>
+
+	<!-- Saudação -->
+	<div th:fragment="saudacoes(usuario)" class="page-header fade-in">
+		<div class="container">
+			<h1>
+				<i class="fas fa-hand-wave me-3"></i> Olá, <span
+					th:text="${usuario?.nomeFilial ?: 'Usuário'}"></span>!
+			</h1>
+			<p>Bem-vindo ao sistema de gestão de motos</p>
+		</div>
+	</div>
+
+	<!-- Modal de confirmação -->
+	<div th:fragment="modal-confirmacao" class="modal fade"
+		id="confirmModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						<i class="fas fa-exclamation-triangle me-2"></i> Confirmar Ação
+					</h5>
+					<button type="button" class="btn-close btn-close-white"
+						data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body text-center">
+					<i class="fas fa-question-circle fa-3x text-warning mb-3"></i>
+					<p class="mb-0">Tem certeza que deseja realizar esta ação?</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">
+						<i class="fas fa-times me-1"></i>Cancelar
+					</button>
+					<button type="button" class="btn btn-danger" id="confirmAction">
+						<i class="fas fa-check me-1"></i>Confirmar
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<div th:fragment="scripts">
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+			crossorigin="anonymous"></script>
+		<script th:inline="javascript">
+			// Inicializar dropdowns do Bootstrap
+			document.addEventListener('DOMContentLoaded', function() {
+				var dropdownElementList = [].slice.call(document
+						.querySelectorAll('.dropdown-toggle'));
+				var dropdownList = dropdownElementList.map(function(
+						dropdownToggleEl) {
+					return new bootstrap.Dropdown(dropdownToggleEl);
+				});
+			});
+
+			// Função para confirmar exclusão
+			function confirmarExclusao(url, elemento) {
+				console.log('Confirmando exclusão para URL:', url);
+
+				const modal = new bootstrap.Modal(document
+						.getElementById('confirmModal'));
+				modal.show();
+
+				// Limpar event listeners anteriores
+				const confirmBtn = document.getElementById('confirmAction');
+				const newConfirmBtn = confirmBtn.cloneNode(true);
+				confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+				// Adicionar novo event listener
+				document.getElementById('confirmAction').onclick = function() {
+					console.log('Redirecionando para:', url);
+					window.location.href = url;
+				};
+			}
+
+			// Função para mostrar loading
+			function mostrarLoading(elemento) {
+				elemento.innerHTML = '<span class="loading"></span> Processando...';
+				elemento.disabled = true;
+			}
+
+			// Auto-hide alerts
+			setTimeout(function() {
+				const alerts = document.querySelectorAll('.alert');
+				alerts.forEach(function(alert) {
+					const bsAlert = new bootstrap.Alert(alert);
+					bsAlert.close();
+				});
+			}, 5000);
+		</script>
+	</div>
+</body>
+</html>

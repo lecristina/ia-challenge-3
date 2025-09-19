@@ -1,0 +1,57 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragmentos :: cabecalho('Relatório de Motos')}" />
+
+<body>
+	<form th:replace="~{fragmentos :: form-logout}" />
+	<div class="container py-4">
+		<div th:replace="~{fragmentos :: saudacoes(${usuario_logado})}" />
+
+		<h1>Relatório de Motos</h1>
+		<p class="text-muted">
+			Gerado em: <span
+				th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+		</p>
+
+		<div class="table-responsive">
+			<table class="table table-striped table-hover">
+				<thead class="table-dark">
+					<tr>
+						<th>ID</th>
+						<th>Placa</th>
+						<th>Chassi</th>
+						<th>Motor</th>
+						<th>Filial</th>
+						<th>Data Criação</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="moto : ${motos}">
+						<td th:text="${moto.id}"></td>
+						<td th:text="${moto.placa}"></td>
+						<td th:text="${moto.chassi}"></td>
+						<td th:text="${moto.motor}"></td>
+						<td th:text="${moto.usuario.nomeFilial}"></td>
+						<td
+							th:text="${#temporals.format(moto.dataCriacao,'dd/MM/yyyy HH:mm')}"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="alert alert-info">
+			<strong>Total de Motos:</strong> <span
+				th:text="${#lists.size(motos)}"></span>
+		</div>
+
+		<div class="d-flex gap-2">
+			<button onclick="window.print()" class="btn btn-primary">Imprimir</button>
+			<a href="/relatorios" class="btn btn-secondary">Voltar aos
+				Relatórios</a> <a href="/motos" class="btn btn-outline-secondary">Lista
+				de Motos</a>
+		</div>
+	</div>
+</body>
+</html>

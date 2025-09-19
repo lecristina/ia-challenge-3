@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Inteligente - TrackZone</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .mapa-container {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            margin: 20px auto;
+            border: 3px solid #333;
+            background: linear-gradient(45deg, #e8f5e8, #f0f8f0);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .zona {
+            position: absolute;
+            border: 2px dashed #666;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #333;
+            flex-direction: column;
+        }
+        .zona-entrada { 
+            top: 10px; left: 10px; width: 200px; height: 80px; 
+            border-color: #28a745; background: rgba(40, 167, 69, 0.1);
+        }
+        .zona-saida { 
+            top: 10px; right: 10px; width: 200px; height: 80px; 
+            border-color: #dc3545; background: rgba(220, 53, 69, 0.1);
+        }
+        .zona-estacionamento { 
+            bottom: 10px; left: 10px; width: 300px; height: 120px; 
+            border-color: #007bff; background: rgba(0, 123, 255, 0.1);
+        }
+        .zona-manutencao { 
+            bottom: 10px; right: 10px; width: 200px; height: 120px; 
+            border-color: #ffc107; background: rgba(255, 193, 7, 0.1);
+        }
+        
+        .moto {
+            position: absolute;
+            width: 30px;
+            height: 20px;
+            background: #ff4444;
+            border-radius: 5px;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(255,68,68,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .moto:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+        .moto.entrada { background: #28a745; }
+        .moto.saida { background: #dc3545; }
+        .moto.estacionamento { background: #007bff; }
+        .moto.manutencao { background: #ffc107; }
+        
+        .moto-info {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 20;
+            display: none;
+        }
+        
+        .coordenadas {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .controles {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .legenda {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .legenda-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legenda-cor {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Mapa Inteligente - TrackZone</h1>
+        <p>Integração: YOLO + Banco de Dados + Posicionamento Inteligente</p>
+        
+        <div class="legenda">
+            <div class="legenda-item">
+                <div class="legenda-cor" style="background: #28a745;"></div>
+                <span>Entrada (Verde)</span>
+            </div>
+            <div class="legenda-item">
+                <div class="legenda-cor" style="background: #dc3545;"></div>
+                <span>Saída (Vermelho)</span>
+            </div>
+            <div class="legenda-item">
+                <div class="legenda-cor" style="background: #007bff;"></div>
+                <span>Estacionamento (Azul)</span>
+            </div>
+            <div class="legenda-item">
+                <div class="legenda-cor" style="background: #ffc107;"></div>
+                <span>Manutenção (Amarelo)</span>
+            </div>
+        </div>
+        
+        <div class="controles">
+            <button class="btn btn-primary" onclick="carregarMotosBanco()">🔄 Carregar Motos do Banco</button>
+            <button class="btn btn-success" onclick="iniciarDetectorYOLO()">🤖 Iniciar Detector YOLO</button>
+            <button class="btn btn-warning" onclick="simularMovimento()">🎯 Simular Movimento</button>
+            <button class="btn btn-danger" onclick="limparMapa()">🗑️ Limpar Mapa</button>
+        </div>
+        
+        <div class="mapa-container" id="mapa">
+            <div class="zona zona-entrada">
+                ENTRADA<br>
+                <small>(10,10)-(210,90)</small><br>
+                <small>Capacidade: 5</small>
+            </div>
+            <div class="zona zona-saida">
+                SAÍDA<br>
+                <small>(430,10)-(630,90)</small><br>
+                <small>Capacidade: 3</small>
+            </div>
+            <div class="zona zona-estacionamento">
+                ESTACIONAMENTO<br>
+                <small>(10,350)-(310,470)</small><br>
+                <small>Capacidade: 15</small>
+            </div>
+            <div class="zona zona-manutencao">
+                MANUTENÇÃO<br>
+                <small>(440,350)-(640,470)</small><br>
+                <small>Capacidade: 8</small>
+            </div>
+            <div class="coordenadas" id="coordenadas">X: 0, Y: 0</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-motos">0</div>
+                <div class="stat-label">Total de Motos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="motos-entrada">0</div>
+                <div class="stat-label">Na Entrada</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="motos-saida">0</div>
+                <div class="stat-label">Na Saída</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="motos-estacionamento">0</div>
+                <div class="stat-label">Estacionadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="motos-manutencao">0</div>
+                <div class="stat-label">Em Manutenção</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let motos = [];
+        let deteccoesYOLO = [];
+        
+        // Motos do banco de dados (simulado)
+        const motosBanco = [
+            {id: 1, placa: "ABC-1234", status: "DISPONIVEL", zona: "estacionamento"},
+            {id: 2, placa: "DEF-5678", status: "EM_USO", zona: "entrada"},
+            {id: 3, placa: "GHI-9012", status: "MANUTENCAO", zona: "manutencao"},
+            {id: 4, placa: "JKL-3456", status: "ALUGADA", zona: "entrada"},
+            {id: 5, placa: "MNO-7890", status: "PRONTA", zona: "estacionamento"},
+            {id: 6, placa: "PQR-2468", status: "DISPONIVEL", zona: "estacionamento"},
+            {id: 7, placa: "STU-1357", status: "MANUTENCAO", zona: "manutencao"},
+            {id: 8, placa: "VWX-9753", status: "EM_USO", zona: "entrada"}
+        ];
+        
+        function obterPosicaoOtima(zona, motoId) {
+            const zonas = {
+                'entrada': {x: [10, 210], y: [10, 90], colunas: 2, linhas: 3},
+                'saida': {x: [430, 630], y: [10, 90], colunas: 2, linhas: 2},
+                'estacionamento': {x: [10, 310], y: [350, 470], colunas: 3, linhas: 5},
+                'manutencao': {x: [440, 640], y: [350, 470], colunas: 2, linhas: 4}
+            };
+            
+            const config = zonas[zona];
+            const coluna = (motoId - 1) % config.colunas;
+            const linha = Math.floor((motoId - 1) / config.colunas) % config.linhas;
+            
+            const largura = config.x[1] - config.x[0] - 40;
+            const altura = config.y[1] - config.y[0] - 40;
+            
+            const x = config.x[0] + 20 + (coluna * largura / config.colunas) + (largura / (2 * config.colunas));
+            const y = config.y[0] + 20 + (linha * altura / config.linhas) + (altura / (2 * config.linhas));
+            
+            return {x: Math.round(x), y: Math.round(y)};
+        }
+        
+        function adicionarMoto(moto) {
+            const posicao = obterPosicaoOtima(moto.zona, moto.id);
+            
+            const motoElement = document.createElement('div');
+            motoElement.className = `moto ${moto.zona}`;
+            motoElement.style.left = posicao.x + 'px';
+            motoElement.style.top = posicao.y + 'px';
+            motoElement.textContent = moto.placa.substring(0, 3);
+            motoElement.title = `${moto.placa} - ${moto.status}`;
+            motoElement.id = `moto-${moto.id}`;
+            
+            // Adiciona info tooltip
+            const info = document.createElement('div');
+            info.className = 'moto-info';
+            info.innerHTML = `
+                <strong>${moto.placa}</strong><br>
+                Status: ${moto.status}<br>
+                Zona: ${moto.zona}<br>
+                Pos: (${posicao.x}, ${posicao.y})
+            `;
+            motoElement.appendChild(info);
+            
+            // Eventos do mouse
+            motoElement.addEventListener('mouseenter', function() {
+                info.style.display = 'block';
+                info.style.left = (posicao.x + 40) + 'px';
+                info.style.top = (posicao.y - 10) + 'px';
+            });
+            
+            motoElement.addEventListener('mouseleave', function() {
+                info.style.display = 'none';
+            });
+            
+            document.getElementById('mapa').appendChild(motoElement);
+            motos.push({...moto, x: posicao.x, y: posicao.y});
+            
+            atualizarEstatisticas();
+        }
+        
+        function carregarMotosBanco() {
+            console.log("🔄 Carregando motos do banco...");
+            limparMapa();
+            
+            motosBanco.forEach(moto => {
+                adicionarMoto(moto);
+            });
+            
+            console.log(`✅ ${motosBanco.length} motos carregadas do banco`);
+        }
+        
+        function iniciarDetectorYOLO() {
+            console.log("🤖 Iniciando detector YOLO...");
+            
+            // Simula detecções YOLO
+            setInterval(() => {
+                if (Math.random() < 0.3) { // 30% chance de detecção
+                    const zonas = ['entrada', 'saida', 'estacionamento', 'manutencao'];
+                    const zona = zonas[Math.floor(Math.random() * zonas.length)];
+                    const posicao = obterPosicaoOtima(zona, Date.now() % 1000);
+                    
+                    const deteccao = {
+                        id: Date.now(),
+                        x: posicao.x,
+                        y: posicao.y,
+                        zona: zona,
+                        confidence: Math.random() * 0.4 + 0.6, // 0.6 a 1.0
+                        timestamp: new Date()
+                    };
+                    
+                    adicionarDeteccaoYOLO(deteccao);
+                }
+            }, 2000);
+        }
+        
+        function adicionarDeteccaoYOLO(deteccao) {
+            const deteccaoElement = document.createElement('div');
+            deteccaoElement.className = `moto ${deteccao.zona}`;
+            deteccaoElement.style.left = deteccao.x + 'px';
+            deteccaoElement.style.top = deteccao.y + 'px';
+            deteccaoElement.textContent = 'YOLO';
+            deteccaoElement.title = `Detecção YOLO - ${deteccao.zona} - ${deteccao.confidence.toFixed(2)}`;
+            deteccaoElement.style.animation = 'pulse 1s infinite';
+            
+            document.getElementById('mapa').appendChild(deteccaoElement);
+            deteccoesYOLO.push(deteccao);
+            
+            // Remove após 5 segundos
+            setTimeout(() => {
+                if (deteccaoElement.parentNode) {
+                    deteccaoElement.parentNode.removeChild(deteccaoElement);
+                }
+            }, 5000);
+            
+            console.log(`🎯 YOLO detectou moto em (${deteccao.x}, ${deteccao.y}) - Zona: ${deteccao.zona}`);
+        }
+        
+        function simularMovimento() {
+            console.log("🎯 Simulando movimento de motos...");
+            
+            motos.forEach(moto => {
+                if (Math.random() < 0.3) { // 30% chance de movimento
+                    const zonas = ['entrada', 'saida', 'estacionamento', 'manutencao'];
+                    const novaZona = zonas[Math.floor(Math.random() * zonas.length)];
+                    const novaPosicao = obterPosicaoOtima(novaZona, moto.id);
+                    
+                    // Move a moto
+                    const motoElement = document.getElementById(`moto-${moto.id}`);
+                    if (motoElement) {
+                        motoElement.style.left = novaPosicao.x + 'px';
+                        motoElement.style.top = novaPosicao.y + 'px';
+                        motoElement.className = `moto ${novaZona}`;
+                    }
+                    
+                    moto.zona = novaZona;
+                    moto.x = novaPosicao.x;
+                    moto.y = novaPosicao.y;
+                    
+                    console.log(`🚗 Moto ${moto.placa} moveu para ${novaZona}`);
+                }
+            });
+            
+            atualizarEstatisticas();
+        }
+        
+        function limparMapa() {
+            document.querySelectorAll('.moto').forEach(moto => moto.remove());
+            motos = [];
+            deteccoesYOLO = [];
+            atualizarEstatisticas();
+        }
+        
+        function atualizarEstatisticas() {
+            const contadores = {
+                entrada: 0,
+                saida: 0,
+                estacionamento: 0,
+                manutencao: 0
+            };
+            
+            motos.forEach(moto => {
+                contadores[moto.zona]++;
+            });
+            
+            document.getElementById('total-motos').textContent = motos.length;
+            document.getElementById('motos-entrada').textContent = contadores.entrada;
+            document.getElementById('motos-saida').textContent = contadores.saida;
+            document.getElementById('motos-estacionamento').textContent = contadores.estacionamento;
+            document.getElementById('motos-manutencao').textContent = contadores.manutencao;
+        }
+        
+        // Atualizar coordenadas do mouse
+        document.getElementById('mapa').addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = Math.round(e.clientX - rect.left);
+            const y = Math.round(e.clientY - rect.top);
+            document.getElementById('coordenadas').textContent = `X: ${x}, Y: ${y}`;
+        });
+        
+        // Carregar motos automaticamente
+        window.onload = function() {
+            carregarMotosBanco();
+        };
+    </script>
+    
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</body>
+</html>
